@@ -3,6 +3,15 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  
+  // Enable CORS for frontend communication
+  app.enableCors({
+    origin: 'http://localhost:3000', // React app port
+    credentials: true,
+  });
+  
+  const port = process.env.PORT ?? 3001;
+  await app.listen(port);
+  console.log(`🚀 Baby Roulette API running on port ${port}`);
 }
 bootstrap();

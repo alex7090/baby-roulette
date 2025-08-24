@@ -15,12 +15,12 @@ export default function App() {
           <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full mb-6 shadow-lg">
             <span className="text-4xl">👶</span>
           </div>
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            Baby Roulette
+                    <h1 className="text-5xl font-bold text-gray-800 mb-4">
+            Roulette Bébé
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Our little miracle is arriving in <span className="font-semibold text-purple-600">6 months</span>! 
-            Help us guess the details about our precious bundle of joy.
+            Notre petit miracle arrive en <span className="font-semibold text-purple-600">janvier 2026</span> ! 
+            Aidez-nous à deviner les détails de notre précieux bout de chou.
           </p>
         </header>
 
@@ -35,7 +35,7 @@ export default function App() {
                   : 'text-gray-600 hover:text-purple-500'
               }`}
             >
-              Make Your Guess
+              Faire mon pronostic
             </button>
             <button
               onClick={() => setCurrentView('results')}
@@ -45,7 +45,7 @@ export default function App() {
                   : 'text-gray-600 hover:text-purple-500'
               }`}
             >
-              See All Guesses
+              Voir tous les pronostics
             </button>
           </div>
         </nav>
@@ -67,7 +67,7 @@ export default function App() {
 
         {/* Footer */}
         <footer className="text-center mt-16 text-gray-500">
-          <p>Made with 💗 for our growing family</p>
+          <p>Fait avec 💗 pour notre famille qui s'agrandit</p>
         </footer>
       </div>
     </div>

@@ -15,19 +15,43 @@ export class Guess {
   birthDate: string;
 
   @Column({ length: 10 })
-  gender: string; // 'boy', 'girl', 'surprise'
+  gender: string; // 'boy', 'girl'
 
   @Column({ length: 50, nullable: true })
-  firstName: string;
+  firstNameBoy: string;
 
   @Column({ length: 50, nullable: true })
-  middleName: string;
+  middleName1Boy: string;
 
-  @Column('decimal', { precision: 4, scale: 1 })
-  weightPounds: number; // in pounds (e.g., 7.5)
+  @Column({ length: 50, nullable: true })
+  middleName2Boy: string;
+
+  @Column({ length: 50, nullable: true })
+  middleName3Boy: string;
+
+  @Column({ length: 50, nullable: true })
+  middleName4Boy: string;
+
+  @Column({ length: 50, nullable: true })
+  firstNameGirl: string;
+
+  @Column({ length: 50, nullable: true })
+  middleName1Girl: string;
+
+  @Column({ length: 50, nullable: true })
+  middleName2Girl: string;
+
+  @Column({ length: 50, nullable: true })
+  middleName3Girl: string;
+
+  @Column({ length: 50, nullable: true })
+  middleName4Girl: string;
+
+  @Column('decimal', { precision: 3, scale: 1 })
+  weightKg: number; // in kg (e.g., 3.5)
 
   @Column('integer')
-  heightInches: number; // in inches
+  heightCm: number; // in cm
 
   @Column('time', { nullable: true })
   birthTime: string; // HH:MM format

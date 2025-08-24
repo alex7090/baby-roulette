@@ -15,30 +15,70 @@ export class CreateGuessDto {
   birthDate: string;
 
   @IsString()
-  @IsIn(['boy', 'girl', 'surprise'])
+  @IsIn(['boy', 'girl'])
   gender: string;
 
   @IsString()
   @IsOptional()
   @MaxLength(50)
-  firstName?: string;
+  firstNameBoy?: string;
 
   @IsString()
   @IsOptional()
   @MaxLength(50)
-  middleName?: string;
+  middleName1Boy?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName2Boy?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName3Boy?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName4Boy?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  firstNameGirl?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName1Girl?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName2Girl?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName3Girl?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  middleName4Girl?: string;
 
   @IsNumber()
-  @Min(3)
-  @Max(15)
+  @Min(1.5)
+  @Max(7)
   @Transform(({ value }) => parseFloat(value))
-  weightPounds: number;
+  weightKg: number;
 
   @IsNumber()
-  @Min(12)
-  @Max(28)
+  @Min(30)
+  @Max(70)
   @Transform(({ value }) => parseInt(value))
-  heightInches: number;
+  heightCm: number;
 
   @IsOptional()
   @IsString()
