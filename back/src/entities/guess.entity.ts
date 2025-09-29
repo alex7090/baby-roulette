@@ -47,8 +47,8 @@ export class Guess {
   @Column({ length: 50, nullable: true })
   middleName4Girl: string;
 
-  @Column('decimal', { precision: 3, scale: 1 })
-  weightKg: number; // in kg (e.g., 3.5)
+  @Column('integer')
+  weightGrams: number; // in grams (e.g., 3500)
 
   @Column('integer')
   heightCm: number; // in cm

@@ -35,7 +35,7 @@ export const translations = {
     
     // Physical characteristics
     physicalCharacteristics: "Caractéristiques physiques",
-    weight: "Poids (kg)",
+    weight: "Poids (g)",
     height: "Taille (cm)",
     eyeColor: "Couleur des yeux",
     hairColor: "Couleur des cheveux",
@@ -171,7 +171,7 @@ export const translations = {
     
     // Physical characteristics
     physicalCharacteristics: "Physical Characteristics",
-    weight: "Weight (kg)",
+    weight: "Weight (g)",
     height: "Height (cm)",
     eyeColor: "Eye Color",
     hairColor: "Hair Color",
@@ -307,7 +307,7 @@ export const translations = {
     
     // Physical characteristics
     physicalCharacteristics: "Cechy fizyczne",
-    weight: "Waga (kg)",
+    weight: "Waga (g)",
     height: "Wzrost (cm)",
     eyeColor: "Kolor oczu",
     hairColor: "Kolor włosów",

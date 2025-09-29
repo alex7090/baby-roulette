@@ -70,10 +70,10 @@ export class CreateGuessDto {
   middleName4Girl?: string;
 
   @IsNumber({}, { message: 'Le poids doit être un nombre' })
-  @Min(1.5, { message: 'Le poids doit être au minimum 1.5 kg' })
-  @Max(7, { message: 'Le poids doit être au maximum 7 kg' })
-  @Transform(({ value }) => parseFloat(value))
-  weightKg: number;
+  @Min(1500, { message: 'Le poids doit être au minimum 1500 grammes' })
+  @Max(7000, { message: 'Le poids doit être au maximum 7000 grammes' })
+  @Transform(({ value }) => parseInt(value))
+  weightGrams: number;
 
   @IsNumber({}, { message: 'La taille doit être un nombre' })
   @Min(30, { message: 'La taille doit être au minimum 30 cm' })

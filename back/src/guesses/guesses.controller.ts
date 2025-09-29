@@ -37,7 +37,7 @@ export class GuessesController {
         middleName2Girl: guess.middleName2Girl,
         middleName3Girl: guess.middleName3Girl,
         middleName4Girl: guess.middleName4Girl,
-        weightKg: guess.weightKg,
+        weightGrams: guess.weightGrams,
         heightCm: guess.heightCm,
         birthTime: guess.birthTime,
         eyeColor: guess.eyeColor,

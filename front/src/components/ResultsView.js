@@ -128,8 +128,8 @@ const ResultsView = () => {
 
   const getAverageWeight = () => {
     if (guesses.length === 0) return 0;
-    const total = guesses.reduce((sum, guess) => sum + parseFloat(guess.weightKg), 0);
-    return (total / guesses.length).toFixed(1);
+    const total = guesses.reduce((sum, guess) => sum + parseInt(guess.weightGrams), 0);
+    return Math.round(total / guesses.length);
   };
 
   const getAverageHeight = () => {
@@ -448,7 +448,7 @@ const ResultsView = () => {
             
             <div className="text-center bg-blue-50 rounded-xl p-4">
               <div className="text-2xl mb-2">⚖️</div>
-              <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
+              <div className="text-xl font-bold text-blue-600">{getAverageWeight()} g</div>
               <div className="text-sm text-gray-600">{t('averageWeight')}</div>
             </div>
             
@@ -559,7 +559,7 @@ const ResultsView = () => {
             
             <div className="text-center bg-blue-50 rounded-xl p-4">
               <div className="text-2xl mb-2">⚖️</div>
-              <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
+              <div className="text-xl font-bold text-blue-600">{getAverageWeight()} g</div>
               <div className="text-sm text-gray-600">{t('averageWeight')}</div>
             </div>
             
@@ -649,7 +649,7 @@ const ResultsView = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-gray-600">{t('weight')} :</span>
-                  <div className="font-medium">{guess.weightKg} kg</div>
+                  <div className="font-medium">{guess.weightGrams} g</div>
                 </div>
                 <div>
                   <span className="text-gray-600">{t('height')} :</span>
