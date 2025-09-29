@@ -3,6 +3,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const GuessForm = ({ onSuccess, submitted }) => {
   const { t } = useLanguage();
+  
+  // Get today's date for min date validation
+  const today = new Date().toISOString().split('T')[0];
+  const maxDate = '2026-03-15';
+  
   const [formData, setFormData] = useState({
     guesserName: '',
     guesserEmail: '',
@@ -209,8 +214,8 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   value={formData.birthDate}
                   onChange={handleChange}
                   required
-                  min="2025-01-01"
-                  max="2026-12-31"
+                  min={today}
+                  max={maxDate}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
