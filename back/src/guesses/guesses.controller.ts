@@ -11,7 +11,7 @@ export class GuessesController {
   async create(@Body(ValidationPipe) createGuessDto: CreateGuessDto) {
     const guess = await this.guessesService.create(createGuessDto);
     return {
-      message: 'Guess submitted successfully!',
+      message: 'Pronostic soumis avec succès !',
       id: guess.id,
       submittedAt: guess.submittedAt,
     };

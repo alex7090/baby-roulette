@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const ResultsView = () => {
   const [guesses, setGuesses] = useState([]);
@@ -6,15 +6,20 @@ const ResultsView = () => {
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ totalGuesses: 0 });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState(null); // 'admin' or 'user'
   const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState('');
+  const [authErrors, setAuthErrors] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [participantNames, setParticipantNames] = useState([]);
+  const passwordInputRef = useRef(null);
 
   useEffect(() => {
     // Check if user is already authenticated from sessionStorage
     const savedAuth = sessionStorage.getItem('baby-roulette-auth');
-    if (savedAuth === 'true') {
+    const savedUserType = sessionStorage.getItem('baby-roulette-user-type');
+    if (savedAuth === 'true' && savedUserType) {
       setIsAuthenticated(true);
+      setUserType(savedUserType);
     } else {
       // If not authenticated, fetch participant names for the animation
       fetchParticipantNames();
@@ -32,7 +37,7 @@ const ResultsView = () => {
     try {
       const response = await fetch('/api/guesses');
       if (!response.ok) {
-        throw new Error('Failed to fetch guesses');
+        throw new Error('Impossible de récupérer les pronostics');
       }
       const data = await response.json();
       setGuesses(data.guesses || []);
@@ -51,7 +56,7 @@ const ResultsView = () => {
         setStats(data);
       }
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      console.error('Impossible de récupérer les statistiques:', err);
     }
   };
 
@@ -65,7 +70,7 @@ const ResultsView = () => {
       }
     } catch (err) {
       // Silently fail - animation is not critical
-      console.log('Could not fetch participant names for animation');
+      console.log('Impossible de récupérer les noms des participants pour l\'animation');
     }
   };
 
@@ -131,26 +136,84 @@ const ResultsView = () => {
     return Math.round(total / guesses.length);
   };
 
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!password.trim()) {
+      errors.push({
+        field: 'password',
+        message: 'Le mot de passe est requis'
+      });
+    } else if (password.length < 3) {
+      errors.push({
+        field: 'password', 
+        message: 'Le mot de passe doit contenir au moins 3 caractères'
+      });
+    }
+    
+    return errors;
+  };
+
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    // Password is now stored in .env file
-    const correctPassword = process.env.REACT_APP_RESULTS_PASSWORD;
+    setIsSubmitting(true);
+    setAuthErrors([]);
     
-    if (password === correctPassword) {
-      setIsAuthenticated(true);
-      setAuthError('');
-      // Remember authentication for the session
-      sessionStorage.setItem('baby-roulette-auth', 'true');
-    } else {
-      setAuthError('Mot de passe incorrect');
-      setPassword('');
+    // Validate form first
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setAuthErrors(validationErrors);
+      setIsSubmitting(false);
+      // Focus on the first error field
+      if (passwordInputRef.current) {
+        passwordInputRef.current.focus();
+      }
+      return;
     }
+    
+    // Simulate a small delay for better UX
+    setTimeout(() => {
+      // Multiple password types
+      const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD || 'admin';
+      const userPassword = process.env.REACT_APP_USER_PASSWORD || 'user';
+      
+      let authenticatedUserType = null;
+      
+      if (password === adminPassword) {
+        authenticatedUserType = 'admin';
+      } else if (password === userPassword) {
+        authenticatedUserType = 'user';
+      }
+      
+      if (authenticatedUserType) {
+        setIsAuthenticated(true);
+        setUserType(authenticatedUserType);
+        setAuthErrors([]);
+        // Remember authentication and user type for the session
+        sessionStorage.setItem('baby-roulette-auth', 'true');
+        sessionStorage.setItem('baby-roulette-user-type', authenticatedUserType);
+      } else {
+        setAuthErrors([{
+          field: 'password',
+          message: 'Mot de passe incorrect. Veuillez réessayer.'
+        }]);
+        setPassword('');
+        // Focus back to password field on error
+        if (passwordInputRef.current) {
+          passwordInputRef.current.focus();
+        }
+      }
+      setIsSubmitting(false);
+    }, 500);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setUserType(null);
     sessionStorage.removeItem('baby-roulette-auth');
+    sessionStorage.removeItem('baby-roulette-user-type');
     setPassword('');
+    setAuthErrors([]);
   };
 
   // Show login form if not authenticated
@@ -188,8 +251,8 @@ const ResultsView = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               Zone privée
             </h2>
-            <p className="text-gray-600">
-              Entrez le mot de passe pour voir tous les pronostics
+            <p className="text-gray-600 mb-4">
+              Entrez le mot de passe pour accéder aux pronostics
             </p>
           </div>
 
@@ -199,26 +262,65 @@ const ResultsView = () => {
                 Mot de passe
               </label>
               <input
+                ref={passwordInputRef}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                  authErrors.some(error => error.field === 'password') 
+                    ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                    : 'border-gray-300 focus:ring-purple-500'
+                }`}
                 placeholder="Entrez le mot de passe"
-                required
+                disabled={isSubmitting}
               />
+              {/* Field-specific errors */}
+              {authErrors
+                .filter(error => error.field === 'password')
+                .map((error, index) => (
+                  <div key={index} className="mt-1 text-sm text-red-600 flex items-center">
+                    <span className="mr-1">⚠️</span>
+                    {error.message}
+                  </div>
+                ))
+              }
             </div>
             
-            {authError && (
+            {/* General errors (not field-specific) */}
+            {authErrors.filter(error => !error.field).length > 0 && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-                {authError}
+                <div className="flex items-start">
+                  <span className="mr-2 mt-0.5">❌</span>
+                  <div>
+                    {authErrors
+                      .filter(error => !error.field)
+                      .map((error, index) => (
+                        <div key={index} className="mb-1 last:mb-0">
+                          {error.message}
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+              disabled={isSubmitting}
+              className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all duration-200"
             >
-              Accéder aux pronostics 🔑
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Vérification...
+                </span>
+              ) : (
+                'Accéder aux pronostics 🔑'
+              )}
             </button>
           </form>
         </div>
@@ -260,54 +362,268 @@ const ResultsView = () => {
 
   const genderStats = getGenderStats();
 
-  return (
-    <div className="space-y-8">
-      {/* Header with logout button */}
-      <div className="flex justify-between items-center">
-        <div></div>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
-        >
-          <span className="mr-2">🔓</span>
-          Se déconnecter
-        </button>
-      </div>
+  // Get popular names for recap view
+  const getPopularNames = () => {
+    const boyNames = [];
+    const girlNames = [];
+    
+    guesses.forEach(guess => {
+      if (guess.firstNameBoy) boyNames.push(guess.firstNameBoy);
+      if (guess.firstNameGirl) girlNames.push(guess.firstNameGirl);
+    });
+    
+    const countNames = (names) => {
+      const counts = {};
+      names.forEach(name => {
+        counts[name] = (counts[name] || 0) + 1;
+      });
+      return Object.entries(counts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([name, count]) => ({ name, count }));
+    };
+    
+    return {
+      boys: countNames(boyNames),
+      girls: countNames(girlNames)
+    };
+  };
 
-      {/* Statistics Overview */}
-      <div className="bg-white rounded-2xl p-8 shadow-xl">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Statistiques des pronostics ({stats.totalGuesses} au total)
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="text-center bg-purple-50 rounded-xl p-4">
-            <div className="text-2xl mb-2">👦</div>
-            <div className="text-xl font-bold text-purple-600">{genderStats.boy}</div>
-            <div className="text-sm text-gray-600">Prédictions Garçon</div>
+  const getMostPopularDate = () => {
+    const dateCounts = {};
+    guesses.forEach(guess => {
+      const date = guess.birthDate;
+      dateCounts[date] = (dateCounts[date] || 0) + 1;
+    });
+    
+    if (Object.keys(dateCounts).length === 0) return null;
+    
+    const [mostPopularDate, count] = Object.entries(dateCounts)
+      .sort(([,a], [,b]) => b - a)[0];
+    
+    return { date: mostPopularDate, count };
+  };
+
+  // Render recap view for regular users
+  const renderUserRecapView = () => {
+    const popularNames = getPopularNames();
+    const popularDate = getMostPopularDate();
+    
+    return (
+      <div className="space-y-8">
+        {/* Header with logout button and user type indicator */}
+        <div className="flex justify-between items-center">
+          <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            👁️ Vue récapitulatif
           </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+          >
+            <span className="mr-2">🔓</span>
+            Se déconnecter
+          </button>
+        </div>
+
+        {/* Statistics Overview */}
+        <div className="bg-white rounded-2xl p-8 shadow-xl">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+            Récapitulatif des pronostics ({stats.totalGuesses} participants)
+          </h2>
           
-          <div className="text-center bg-pink-50 rounded-xl p-4">
-            <div className="text-2xl mb-2">👧</div>
-            <div className="text-xl font-bold text-pink-600">{genderStats.girl}</div>
-            <div className="text-sm text-gray-600">Prédictions Fille</div>
-          </div>
-          
-          <div className="text-center bg-blue-50 rounded-xl p-4">
-            <div className="text-2xl mb-2">⚖️</div>
-            <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
-            <div className="text-sm text-gray-600">Poids moyen</div>
-          </div>
-          
-          <div className="text-center bg-green-50 rounded-xl p-4">
-            <div className="text-2xl mb-2">📏</div>
-            <div className="text-xl font-bold text-green-600">{getAverageHeight()} cm</div>
-            <div className="text-sm text-gray-600">Taille moyenne</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center bg-purple-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">👦</div>
+              <div className="text-xl font-bold text-purple-600">{genderStats.boy}</div>
+              <div className="text-sm text-gray-600">Prédictions Garçon</div>
+            </div>
+            
+            <div className="text-center bg-pink-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">👧</div>
+              <div className="text-xl font-bold text-pink-600">{genderStats.girl}</div>
+              <div className="text-sm text-gray-600">Prédictions Fille</div>
+            </div>
+            
+            <div className="text-center bg-blue-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">⚖️</div>
+              <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
+              <div className="text-sm text-gray-600">Poids moyen</div>
+            </div>
+            
+            <div className="text-center bg-green-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">📏</div>
+              <div className="text-xl font-bold text-green-600">{getAverageHeight()} cm</div>
+              <div className="text-sm text-gray-600">Taille moyenne</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Individual Guesses */}
+        {/* Popular Names */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-2xl p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
+              <span className="mr-2">👦</span> Prénoms garçon populaires
+            </h3>
+            {popularNames.boys.length > 0 ? (
+              <div className="space-y-2">
+                {popularNames.boys.map((nameData, index) => (
+                  <div key={index} className="flex justify-between items-center bg-blue-50 rounded-lg px-4 py-2">
+                    <span className="font-medium">{nameData.name}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">Aucun prénom de garçon suggéré</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-pink-800 mb-4 flex items-center">
+              <span className="mr-2">👧</span> Prénoms fille populaires
+            </h3>
+            {popularNames.girls.length > 0 ? (
+              <div className="space-y-2">
+                {popularNames.girls.map((nameData, index) => (
+                  <div key={index} className="flex justify-between items-center bg-pink-50 rounded-lg px-4 py-2">
+                    <span className="font-medium">{nameData.name}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">Aucun prénom de fille suggéré</p>
+            )}
+          </div>
+        </div>
+
+        {/* Most Popular Date */}
+        {popularDate && (
+          <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
+            <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
+              <span className="mr-2">📅</span> Date la plus populaire
+            </h3>
+            <div className="text-3xl font-bold text-purple-600 mb-2">
+              {formatDate(popularDate.date)}
+            </div>
+            <p className="text-gray-600">
+              {popularDate.count} personne{popularDate.count > 1 ? 's ont choisi' : ' a choisi'} cette date
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render admin view (full detailed view)
+  const renderAdminView = () => {
+    const popularNames = getPopularNames();
+    const popularDate = getMostPopularDate();
+    
+    return (
+      <div className="space-y-8">
+        {/* Header with logout button and admin indicator */}
+        <div className="flex justify-between items-center">
+          <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+            🔑 Vue administrateur
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+          >
+            <span className="mr-2">🔓</span>
+            Se déconnecter
+          </button>
+        </div>
+
+        {/* Statistics Overview */}
+        <div className="bg-white rounded-2xl p-8 shadow-xl">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+            Statistiques des pronostics ({stats.totalGuesses} au total)
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center bg-purple-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">👦</div>
+              <div className="text-xl font-bold text-purple-600">{genderStats.boy}</div>
+              <div className="text-sm text-gray-600">Prédictions Garçon</div>
+            </div>
+            
+            <div className="text-center bg-pink-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">👧</div>
+              <div className="text-xl font-bold text-pink-600">{genderStats.girl}</div>
+              <div className="text-sm text-gray-600">Prédictions Fille</div>
+            </div>
+            
+            <div className="text-center bg-blue-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">⚖️</div>
+              <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
+              <div className="text-sm text-gray-600">Poids moyen</div>
+            </div>
+            
+            <div className="text-center bg-green-50 rounded-xl p-4">
+              <div className="text-2xl mb-2">📏</div>
+              <div className="text-xl font-bold text-green-600">{getAverageHeight()} cm</div>
+              <div className="text-sm text-gray-600">Taille moyenne</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Popular Names */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-2xl p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
+              <span className="mr-2">👦</span> Prénoms garçon populaires
+            </h3>
+            {popularNames.boys.length > 0 ? (
+              <div className="space-y-2">
+                {popularNames.boys.map((nameData, index) => (
+                  <div key={index} className="flex justify-between items-center bg-blue-50 rounded-lg px-4 py-2">
+                    <span className="font-medium">{nameData.name}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">Aucun prénom de garçon suggéré</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-pink-800 mb-4 flex items-center">
+              <span className="mr-2">👧</span> Prénoms fille populaires
+            </h3>
+            {popularNames.girls.length > 0 ? (
+              <div className="space-y-2">
+                {popularNames.girls.map((nameData, index) => (
+                  <div key={index} className="flex justify-between items-center bg-pink-50 rounded-lg px-4 py-2">
+                    <span className="font-medium">{nameData.name}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">Aucun prénom de fille suggéré</p>
+            )}
+          </div>
+        </div>
+
+        {/* Most Popular Date */}
+        {popularDate && (
+          <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
+            <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
+              <span className="mr-2">📅</span> Date la plus populaire
+            </h3>
+            <div className="text-3xl font-bold text-purple-600 mb-2">
+              {formatDate(popularDate.date)}
+            </div>
+            <p className="text-gray-600">
+              {popularDate.count} personne{popularDate.count > 1 ? 's ont choisi' : ' a choisi'} cette date
+            </p>
+          </div>
+        )}
+
+        {/* Individual Guesses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {guesses.map((guess) => (
           <div key={guess.id} className="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow">
@@ -395,9 +711,13 @@ const ResultsView = () => {
             </div>
           </div>
         ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  // Main render based on user type
+  return userType === 'admin' ? renderAdminView() : renderUserRecapView();
 };
 
 export default ResultsView; 

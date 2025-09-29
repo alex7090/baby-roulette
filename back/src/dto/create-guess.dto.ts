@@ -2,20 +2,21 @@ import { IsString, IsEmail, IsOptional, IsDateString, IsNumber, IsIn, MaxLength,
 import { Transform } from 'class-transformer';
 
 export class CreateGuessDto {
-  @IsString()
-  @MaxLength(100)
+  @IsString({ message: 'Le nom doit être une chaîne de caractères' })
+  @MaxLength(100, { message: 'Le nom ne peut pas dépasser 100 caractères' })
   guesserName: string;
 
-  @IsEmail()
   @IsOptional()
-  @MaxLength(200)
+  @IsEmail({}, { message: 'L\'email doit avoir un format valide' })
+  @MaxLength(200, { message: 'L\'email ne peut pas dépasser 200 caractères' })
+  @Transform(({ value }) => value === '' ? undefined : value)
   guesserEmail?: string;
 
-  @IsDateString()
+  @IsDateString({}, { message: 'La date de naissance doit être une date valide' })
   birthDate: string;
 
-  @IsString()
-  @IsIn(['boy', 'girl'])
+  @IsString({ message: 'Le genre doit être une chaîne de caractères' })
+  @IsIn(['boy', 'girl'], { message: 'Le genre doit être "boy" ou "girl"' })
   gender: string;
 
   @IsString()
@@ -68,15 +69,15 @@ export class CreateGuessDto {
   @MaxLength(50)
   middleName4Girl?: string;
 
-  @IsNumber()
-  @Min(1.5)
-  @Max(7)
+  @IsNumber({}, { message: 'Le poids doit être un nombre' })
+  @Min(1.5, { message: 'Le poids doit être au minimum 1.5 kg' })
+  @Max(7, { message: 'Le poids doit être au maximum 7 kg' })
   @Transform(({ value }) => parseFloat(value))
   weightKg: number;
 
-  @IsNumber()
-  @Min(30)
-  @Max(70)
+  @IsNumber({}, { message: 'La taille doit être un nombre' })
+  @Min(30, { message: 'La taille doit être au minimum 30 cm' })
+  @Max(70, { message: 'La taille doit être au maximum 70 cm' })
   @Transform(({ value }) => parseInt(value))
   heightCm: number;
 

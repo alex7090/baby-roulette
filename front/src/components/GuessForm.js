@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const GuessForm = ({ onSuccess, submitted }) => {
   const [formData, setFormData] = useState({
@@ -26,9 +26,24 @@ const GuessForm = ({ onSuccess, submitted }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const errorRef = useRef(null);
+
+  // Focus on error message when it appears
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.focus();
+      errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [error]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Clear error when user starts typing again
+    if (error) {
+      setError('');
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -41,17 +56,37 @@ const GuessForm = ({ onSuccess, submitted }) => {
     setError('');
 
     try {
+      // Clean the form data - remove empty strings for optional fields
+      const cleanedFormData = {
+        ...formData,
+        guesserEmail: formData.guesserEmail.trim() || undefined,
+        firstNameBoy: formData.firstNameBoy.trim() || undefined,
+        middleName1Boy: formData.middleName1Boy.trim() || undefined,
+        middleName2Boy: formData.middleName2Boy.trim() || undefined,
+        middleName3Boy: formData.middleName3Boy.trim() || undefined,
+        middleName4Boy: formData.middleName4Boy.trim() || undefined,
+        firstNameGirl: formData.firstNameGirl.trim() || undefined,
+        middleName1Girl: formData.middleName1Girl.trim() || undefined,
+        middleName2Girl: formData.middleName2Girl.trim() || undefined,
+        middleName3Girl: formData.middleName3Girl.trim() || undefined,
+        middleName4Girl: formData.middleName4Girl.trim() || undefined,
+        birthTime: formData.birthTime || undefined,
+        eyeColor: formData.eyeColor || undefined,
+        hairColor: formData.hairColor || undefined,
+        specialMessage: formData.specialMessage.trim() || undefined,
+      };
+
       const response = await fetch('/api/guesses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanedFormData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit guess');
+        throw new Error(errorData.message || 'Échec de l\'envoi du pronostic');
       }
 
       onSuccess();
@@ -69,8 +104,29 @@ const GuessForm = ({ onSuccess, submitted }) => {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl">✅</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Pronostic envoyé !</h2>
-          <p className="text-gray-600">Merci pour votre prédiction. Nous avons hâte de voir à quel point vous vous êtes approché !</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Pronostic envoyé !</h2>
+          <p className="text-gray-600 mb-6">Merci pour votre prédiction. Nous avons hâte de voir à quel point vous vous êtes approché !</p>
+          
+          {/* Password reveal section */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-center mb-2">
+              <span className="text-lg mr-2">🔑</span>
+              <h3 className="font-semibold text-blue-800">Accès aux résultats</h3>
+            </div>
+            <p className="text-sm text-blue-700 mb-3">
+              Utilisez ce mot de passe pour voir le récapitulatif des pronostics :
+            </p>
+            <div className="bg-white border-2 border-blue-300 rounded-lg px-4 py-3">
+              <div className="text-xs text-gray-500 mb-1">Mot de passe utilisateur :</div>
+              <div className="text-lg font-mono font-bold text-blue-800 bg-blue-100 px-3 py-1 rounded">
+                {process.env.REACT_APP_USER_PASSWORD || 'user'}
+              </div>
+            </div>
+          </div>
+          
+          <p className="text-xs text-gray-500">
+            Cliquez sur "Voir tous les pronostics" puis utilisez ce mot de passe pour accéder au récapitulatif.
+          </p>
         </div>
       </div>
     );
@@ -82,8 +138,19 @@ const GuessForm = ({ onSuccess, submitted }) => {
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Faites votre pronostic</h2>
         
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-            {error}
+          <div 
+            ref={errorRef}
+            tabIndex="-1"
+            className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
+            role="alert"
+            aria-live="polite"
+          >
+            <div className="flex items-center">
+              <span className="mr-2 text-lg">❌</span>
+              <div>
+                <strong>Erreur :</strong> {error}
+              </div>
+            </div>
           </div>
         )}
 
@@ -110,7 +177,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email (facultatif)
+                  Email <span className="text-sm font-normal text-gray-500">(optionnel)</span>
                 </label>
                 <input
                   type="email"
@@ -118,7 +185,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   value={formData.guesserEmail}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="votre.email@exemple.com"
+                  placeholder="votre.email@exemple.com (optionnel)"
                 />
               </div>
             </div>

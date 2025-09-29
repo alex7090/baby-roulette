@@ -21,7 +21,7 @@ export class GuessesService {
     });
 
     if (existingGuess) {
-      throw new ConflictException('You have already submitted a guess! Only one guess per person.');
+      throw new ConflictException('Vous avez déjà soumis un pronostic ! Un seul pronostic par personne autorisé.');
     }
 
     const guess = this.guessesRepository.create(createGuessDto);
