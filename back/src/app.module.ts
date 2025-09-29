@@ -11,7 +11,7 @@ import { Guess } from './entities/guess.entity';
       type: 'sqlite',
       database: 'baby-roulette.db',
       entities: [Guess],
-      synchronize: true, // Only for development
+      synchronize: false,
     }),
     GuessesModule,
   ],
