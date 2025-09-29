@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const GuessForm = ({ onSuccess, submitted }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     guesserName: '',
     guesserEmail: '',
@@ -104,20 +106,20 @@ const GuessForm = ({ onSuccess, submitted }) => {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl">✅</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Pronostic envoyé !</h2>
-          <p className="text-gray-600 mb-6">Merci pour votre prédiction. Nous avons hâte de voir à quel point vous vous êtes approché !</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('guessSubmitted')}</h2>
+          <p className="text-gray-600 mb-6">{t('thankYou')}</p>
           
           {/* Password reveal section */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-center mb-2">
               <span className="text-lg mr-2">🔑</span>
-              <h3 className="font-semibold text-blue-800">Accès aux résultats</h3>
+              <h3 className="font-semibold text-blue-800">{t('accessResults')}</h3>
             </div>
             <p className="text-sm text-blue-700 mb-3">
-              Utilisez ce mot de passe pour voir le récapitulatif des pronostics :
+              {t('usePassword')}
             </p>
             <div className="bg-white border-2 border-blue-300 rounded-lg px-4 py-3">
-              <div className="text-xs text-gray-500 mb-1">Mot de passe utilisateur :</div>
+              <div className="text-xs text-gray-500 mb-1">{t('userPassword')}</div>
               <div className="text-lg font-mono font-bold text-blue-800 bg-blue-100 px-3 py-1 rounded">
                 {process.env.REACT_APP_USER_PASSWORD || 'user'}
               </div>
@@ -125,7 +127,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
           </div>
           
           <p className="text-xs text-gray-500">
-            Cliquez sur "Voir tous les pronostics" puis utilisez ce mot de passe pour accéder au récapitulatif.
+            {t('clickViewResults')}
           </p>
         </div>
       </div>
@@ -135,7 +137,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
   return (
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-xl">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Faites votre pronostic</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">{t('formTitle')}</h2>
         
         {error && (
           <div 
@@ -158,12 +160,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
           {/* Personal Info */}
           <div className="bg-purple-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-              <span className="mr-2">👤</span> Vos informations
+              <span className="mr-2">👤</span> {t('personalInfo')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Votre nom *
+                  {t('yourName')} {t('required')}
                 </label>
                 <input
                   type="text"
@@ -172,12 +174,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Entrez votre nom"
+                  placeholder={t('yourNamePlaceholder')}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email <span className="text-sm font-normal text-gray-500">(optionnel)</span>
+                  {t('email')} <span className="text-sm font-normal text-gray-500">{t('emailOptional')}</span>
                 </label>
                 <input
                   type="email"
@@ -185,7 +187,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   value={formData.guesserEmail}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="votre.email@exemple.com (optionnel)"
+                  placeholder={t('emailPlaceholder')}
                 />
               </div>
             </div>
@@ -194,12 +196,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
           {/* Birth Details */}
           <div className="bg-blue-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-              <span className="mr-2">📅</span> Prédictions de naissance
+              <span className="mr-2">📅</span> {t('birthPredictions')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date de naissance *
+                  {t('birthDate')} {t('required')}
                 </label>
                 <input
                   type="date"
@@ -214,7 +216,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Heure de naissance
+                  {t('birthTime')}
                 </label>
                 <input
                   type="time"
@@ -226,12 +228,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sexe *
+                  {t('gender')} {t('required')}
                 </label>
                 <div className="flex space-x-4">
                   {[
-                    { value: 'boy', label: 'Garçon' },
-                    { value: 'girl', label: 'Fille' }
+                    { value: 'boy', label: t('boy') },
+                    { value: 'girl', label: t('girl') }
                   ].map((option) => (
                     <label key={option.value} className="flex items-center">
                       <input
@@ -254,12 +256,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
           {/* Physical Details */}
           <div className="bg-green-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
-              <span className="mr-2">📏</span> Caractéristiques physiques
+              <span className="mr-2">📏</span> {t('physicalCharacteristics')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Poids (kg) *
+                  {t('weight')} {t('required')}
                 </label>
                 <input
                   type="number"
@@ -276,7 +278,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Taille (cm) *
+                  {t('height')} {t('required')}
                 </label>
                 <input
                   type="number"
@@ -292,7 +294,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Couleur des yeux
+                  {t('eyeColor')}
                 </label>
                 <select
                   name="eyeColor"
@@ -300,17 +302,17 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
-                  <option value="">Choisir la couleur des yeux</option>
-                  <option value="brown">Marron</option>
-                  <option value="blue">Bleu</option>
-                  <option value="green">Vert</option>
-                  <option value="hazel">Noisette</option>
-                  <option value="gray">Gris</option>
+                  <option value="">{t('eyeColorPlaceholder')}</option>
+                  <option value="brown">{t('brown')}</option>
+                  <option value="blue">{t('blue')}</option>
+                  <option value="green">{t('green')}</option>
+                  <option value="hazel">{t('hazel')}</option>
+                  <option value="gray">{t('gray')}</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Couleur des cheveux
+                  {t('hairColor')}
                 </label>
                 <select
                   name="hairColor"
@@ -318,11 +320,11 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
-                  <option value="">Choisir la couleur des cheveux</option>
-                  <option value="black">Noir</option>
-                  <option value="brown">Châtain</option>
-                  <option value="blonde">Blond</option>
-                  <option value="red">Roux</option>
+                  <option value="">{t('hairColorPlaceholder')}</option>
+                  <option value="black">{t('black')}</option>
+                  <option value="brown">{t('brownHair')}</option>
+                  <option value="blonde">{t('blonde')}</option>
+                  <option value="red">{t('red')}</option>
                 </select>
               </div>
             </div>
@@ -331,12 +333,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
           {/* Boy Names */}
           <div className="bg-blue-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-              <span className="mr-2">👦</span> Prénoms si c'est un garçon
+              <span className="mr-2">👦</span> {t('boyNames')}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prénom principal
+                  {t('firstName')}
                 </label>
                 <input
                   type="text"
@@ -344,13 +346,13 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   value={formData.firstNameBoy}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Prénom de garçon"
+                  placeholder={t('firstNameBoyPlaceholder')}
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deuxièmes prénoms (jusqu'à 4)
+                  {t('middleNames')}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
@@ -359,7 +361,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName1Boy}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="1er deuxième prénom"
+                    placeholder={t('middleName1')}
                   />
                   <input
                     type="text"
@@ -367,7 +369,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName2Boy}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="2ème deuxième prénom"
+                    placeholder={t('middleName2')}
                   />
                   <input
                     type="text"
@@ -375,7 +377,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName3Boy}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="3ème deuxième prénom"
+                    placeholder={t('middleName3')}
                   />
                   <input
                     type="text"
@@ -383,7 +385,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName4Boy}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="4ème deuxième prénom"
+                    placeholder={t('middleName4')}
                   />
                 </div>
               </div>
@@ -393,12 +395,12 @@ const GuessForm = ({ onSuccess, submitted }) => {
           {/* Girl Names */}
           <div className="bg-pink-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-pink-800 mb-4 flex items-center">
-              <span className="mr-2">👧</span> Prénoms si c'est une fille
+              <span className="mr-2">👧</span> {t('girlNames')}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prénom principal
+                  {t('firstName')}
                 </label>
                 <input
                   type="text"
@@ -406,13 +408,13 @@ const GuessForm = ({ onSuccess, submitted }) => {
                   value={formData.firstNameGirl}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  placeholder="Prénom de fille"
+                  placeholder={t('firstNameGirlPlaceholder')}
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deuxièmes prénoms (jusqu'à 4)
+                  {t('middleNames')}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
@@ -421,7 +423,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName1Girl}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="1er deuxième prénom"
+                    placeholder={t('middleName1')}
                   />
                   <input
                     type="text"
@@ -429,7 +431,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName2Girl}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="2ème deuxième prénom"
+                    placeholder={t('middleName2')}
                   />
                   <input
                     type="text"
@@ -437,7 +439,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName3Girl}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="3ème deuxième prénom"
+                    placeholder={t('middleName3')}
                   />
                   <input
                     type="text"
@@ -445,7 +447,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
                     value={formData.middleName4Girl}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="4ème deuxième prénom"
+                    placeholder={t('middleName4')}
                   />
                 </div>
               </div>
@@ -455,7 +457,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
           {/* Special Message */}
           <div className="bg-pink-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-pink-800 mb-4 flex items-center">
-              <span className="mr-2">💝</span> Message spécial
+              <span className="mr-2">💝</span> {t('specialMessage')}
             </h3>
             <textarea
               name="specialMessage"
@@ -463,7 +465,7 @@ const GuessForm = ({ onSuccess, submitted }) => {
               onChange={handleChange}
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="Laissez un doux message aux futurs parents..."
+              placeholder={t('specialMessagePlaceholder')}
             />
           </div>
         </div>
@@ -479,10 +481,10 @@ const GuessForm = ({ onSuccess, submitted }) => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Envoi en cours...
+              {t('submitting')}
             </span>
           ) : (
-            'Envoyer mon pronostic 🎯'
+            t('submitGuess')
           )}
         </button>
       </form>

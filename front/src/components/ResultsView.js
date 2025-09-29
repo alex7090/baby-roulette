@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ResultsView = () => {
+  const { t } = useLanguage();
   const [guesses, setGuesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,7 +39,7 @@ const ResultsView = () => {
     try {
       const response = await fetch('/api/guesses');
       if (!response.ok) {
-        throw new Error('Impossible de récupérer les pronostics');
+        throw new Error(t('failedToFetchPredictions'));
       }
       const data = await response.json();
       setGuesses(data.guesses || []);
@@ -56,7 +58,7 @@ const ResultsView = () => {
         setStats(data);
       }
     } catch (err) {
-      console.error('Impossible de récupérer les statistiques:', err);
+      console.error(t('failedToFetchStats'), err);
     }
   };
 
@@ -70,7 +72,7 @@ const ResultsView = () => {
       }
     } catch (err) {
       // Silently fail - animation is not critical
-      console.log('Impossible de récupérer les noms des participants pour l\'animation');
+      console.log(t('failedToFetchNames'));
     }
   };
 
@@ -83,7 +85,7 @@ const ResultsView = () => {
   };
 
   const formatTime = (timeString) => {
-    if (!timeString) return 'Non spécifiée';
+    if (!timeString) return t('notSpecified');
     const [hours, minutes] = timeString.split(':');
     const date = new Date();
     date.setHours(parseInt(hours), parseInt(minutes));
@@ -142,12 +144,12 @@ const ResultsView = () => {
     if (!password.trim()) {
       errors.push({
         field: 'password',
-        message: 'Le mot de passe est requis'
+        message: t('passwordRequired')
       });
     } else if (password.length < 3) {
       errors.push({
         field: 'password', 
-        message: 'Le mot de passe doit contenir au moins 3 caractères'
+        message: t('passwordMinLength')
       });
     }
     
@@ -195,7 +197,7 @@ const ResultsView = () => {
       } else {
         setAuthErrors([{
           field: 'password',
-          message: 'Mot de passe incorrect. Veuillez réessayer.'
+          message: t('incorrectPassword')
         }]);
         setPassword('');
         // Focus back to password field on error
@@ -225,7 +227,7 @@ const ResultsView = () => {
           <div className="mb-8 overflow-hidden">
             <div className="text-center mb-4">
               <p className="text-sm text-gray-600 font-medium">
-                🎉 Ils ont déjà participé :
+                {t('theyAlreadyParticipated')}
               </p>
             </div>
             <div className="relative h-12 bg-gradient-to-r from-pink-50 to-purple-50 rounded-full flex items-center overflow-hidden">
@@ -249,17 +251,17 @@ const ResultsView = () => {
               <span className="text-2xl">🔒</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Zone privée
+              {t('privateZone')}
             </h2>
             <p className="text-gray-600 mb-4">
-              Entrez le mot de passe pour accéder aux pronostics
+              {t('enterPassword')}
             </p>
           </div>
 
           <form onSubmit={handlePasswordSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
+                {t('password')}
               </label>
               <input
                 ref={passwordInputRef}
@@ -271,7 +273,7 @@ const ResultsView = () => {
                     ? 'border-red-500 focus:ring-red-500 bg-red-50' 
                     : 'border-gray-300 focus:ring-purple-500'
                 }`}
-                placeholder="Entrez le mot de passe"
+                placeholder={t('enterPasswordPlaceholder')}
                 disabled={isSubmitting}
               />
               {/* Field-specific errors */}
@@ -316,10 +318,10 @@ const ResultsView = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Vérification...
+                  {t('verifying')}
                 </span>
               ) : (
-                'Accéder aux pronostics 🔑'
+                t('accessPredictions')
               )}
             </button>
           </form>
@@ -333,7 +335,7 @@ const ResultsView = () => {
       <div className="flex justify-center items-center min-h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des pronostics...</p>
+          <p className="text-gray-600">{t('loadingPredictions')}</p>
         </div>
       </div>
     );
@@ -342,7 +344,7 @@ const ResultsView = () => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg">
-        <h3 className="font-semibold mb-2">Erreur lors du chargement des pronostics</h3>
+        <h3 className="font-semibold mb-2">{t('errorLoadingPredictions')}</h3>
         <p>{error}</p>
       </div>
     );
@@ -354,8 +356,8 @@ const ResultsView = () => {
         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <span className="text-4xl">📝</span>
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Aucun pronostic pour l'instant</h2>
-        <p className="text-gray-600">Soyez le premier à faire une prédiction sur le bébé !</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('noPredictionsYet')}</h2>
+        <p className="text-gray-600">{t('beFirstToPredict')}</p>
       </div>
     );
   }
@@ -414,46 +416,46 @@ const ResultsView = () => {
         {/* Header with logout button and user type indicator */}
         <div className="flex justify-between items-center">
           <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-            👁️ Vue récapitulatif
+            {t('summaryView')}
           </div>
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
           >
             <span className="mr-2">🔓</span>
-            Se déconnecter
+            {t('disconnect')}
           </button>
         </div>
 
         {/* Statistics Overview */}
         <div className="bg-white rounded-2xl p-8 shadow-xl">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            Récapitulatif des pronostics ({stats.totalGuesses} participants)
+            {t('predictionsSummary')} ({stats.totalGuesses} {t('participants')})
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="text-center bg-purple-50 rounded-xl p-4">
               <div className="text-2xl mb-2">👦</div>
               <div className="text-xl font-bold text-purple-600">{genderStats.boy}</div>
-              <div className="text-sm text-gray-600">Prédictions Garçon</div>
+              <div className="text-sm text-gray-600">{t('boyPredictions')}</div>
             </div>
             
             <div className="text-center bg-pink-50 rounded-xl p-4">
               <div className="text-2xl mb-2">👧</div>
               <div className="text-xl font-bold text-pink-600">{genderStats.girl}</div>
-              <div className="text-sm text-gray-600">Prédictions Fille</div>
+              <div className="text-sm text-gray-600">{t('girlPredictions')}</div>
             </div>
             
             <div className="text-center bg-blue-50 rounded-xl p-4">
               <div className="text-2xl mb-2">⚖️</div>
               <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
-              <div className="text-sm text-gray-600">Poids moyen</div>
+              <div className="text-sm text-gray-600">{t('averageWeight')}</div>
             </div>
             
             <div className="text-center bg-green-50 rounded-xl p-4">
               <div className="text-2xl mb-2">📏</div>
               <div className="text-xl font-bold text-green-600">{getAverageHeight()} cm</div>
-              <div className="text-sm text-gray-600">Taille moyenne</div>
+              <div className="text-sm text-gray-600">{t('averageHeight')}</div>
             </div>
           </div>
         </div>
@@ -462,37 +464,37 @@ const ResultsView = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
-              <span className="mr-2">👦</span> Prénoms garçon populaires
+              <span className="mr-2">👦</span> {t('popularBoyNames')}
             </h3>
             {popularNames.boys.length > 0 ? (
               <div className="space-y-2">
                 {popularNames.boys.map((nameData, index) => (
                   <div key={index} className="flex justify-between items-center bg-blue-50 rounded-lg px-4 py-2">
                     <span className="font-medium">{nameData.name}</span>
-                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} {nameData.count > 1 ? t('votes') : t('vote')}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">Aucun prénom de garçon suggéré</p>
+              <p className="text-gray-500 italic">{t('noBoyNameSuggested')}</p>
             )}
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-pink-800 mb-4 flex items-center">
-              <span className="mr-2">👧</span> Prénoms fille populaires
+              <span className="mr-2">👧</span> {t('popularGirlNames')}
             </h3>
             {popularNames.girls.length > 0 ? (
               <div className="space-y-2">
                 {popularNames.girls.map((nameData, index) => (
                   <div key={index} className="flex justify-between items-center bg-pink-50 rounded-lg px-4 py-2">
                     <span className="font-medium">{nameData.name}</span>
-                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} {nameData.count > 1 ? t('votes') : t('vote')}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">Aucun prénom de fille suggéré</p>
+              <p className="text-gray-500 italic">{t('noGirlNameSuggested')}</p>
             )}
           </div>
         </div>
@@ -501,13 +503,13 @@ const ResultsView = () => {
         {popularDate && (
           <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
             <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
-              <span className="mr-2">📅</span> Date la plus populaire
+              <span className="mr-2">📅</span> {t('mostPopularDate')}
             </h3>
             <div className="text-3xl font-bold text-purple-600 mb-2">
               {formatDate(popularDate.date)}
             </div>
             <p className="text-gray-600">
-              {popularDate.count} personne{popularDate.count > 1 ? 's ont choisi' : ' a choisi'} cette date
+              {popularDate.count} {popularDate.count > 1 ? t('people') : t('person')} {popularDate.count > 1 ? t('choseThisDatePlural') : t('choseThisDate')}
             </p>
           </div>
         )}
@@ -525,46 +527,46 @@ const ResultsView = () => {
         {/* Header with logout button and admin indicator */}
         <div className="flex justify-between items-center">
           <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
-            🔑 Vue administrateur
+            {t('adminView')}
           </div>
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
           >
             <span className="mr-2">🔓</span>
-            Se déconnecter
+            {t('disconnect')}
           </button>
         </div>
 
         {/* Statistics Overview */}
         <div className="bg-white rounded-2xl p-8 shadow-xl">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            Statistiques des pronostics ({stats.totalGuesses} au total)
+            {t('statisticsSummary')} ({stats.totalGuesses} {t('totalCount')})
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="text-center bg-purple-50 rounded-xl p-4">
               <div className="text-2xl mb-2">👦</div>
               <div className="text-xl font-bold text-purple-600">{genderStats.boy}</div>
-              <div className="text-sm text-gray-600">Prédictions Garçon</div>
+              <div className="text-sm text-gray-600">{t('boyPredictions')}</div>
             </div>
             
             <div className="text-center bg-pink-50 rounded-xl p-4">
               <div className="text-2xl mb-2">👧</div>
               <div className="text-xl font-bold text-pink-600">{genderStats.girl}</div>
-              <div className="text-sm text-gray-600">Prédictions Fille</div>
+              <div className="text-sm text-gray-600">{t('girlPredictions')}</div>
             </div>
             
             <div className="text-center bg-blue-50 rounded-xl p-4">
               <div className="text-2xl mb-2">⚖️</div>
               <div className="text-xl font-bold text-blue-600">{getAverageWeight()} kg</div>
-              <div className="text-sm text-gray-600">Poids moyen</div>
+              <div className="text-sm text-gray-600">{t('averageWeight')}</div>
             </div>
             
             <div className="text-center bg-green-50 rounded-xl p-4">
               <div className="text-2xl mb-2">📏</div>
               <div className="text-xl font-bold text-green-600">{getAverageHeight()} cm</div>
-              <div className="text-sm text-gray-600">Taille moyenne</div>
+              <div className="text-sm text-gray-600">{t('averageHeight')}</div>
             </div>
           </div>
         </div>
@@ -573,37 +575,37 @@ const ResultsView = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
-              <span className="mr-2">👦</span> Prénoms garçon populaires
+              <span className="mr-2">👦</span> {t('popularBoyNames')}
             </h3>
             {popularNames.boys.length > 0 ? (
               <div className="space-y-2">
                 {popularNames.boys.map((nameData, index) => (
                   <div key={index} className="flex justify-between items-center bg-blue-50 rounded-lg px-4 py-2">
                     <span className="font-medium">{nameData.name}</span>
-                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} {nameData.count > 1 ? t('votes') : t('vote')}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">Aucun prénom de garçon suggéré</p>
+              <p className="text-gray-500 italic">{t('noBoyNameSuggested')}</p>
             )}
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-pink-800 mb-4 flex items-center">
-              <span className="mr-2">👧</span> Prénoms fille populaires
+              <span className="mr-2">👧</span> {t('popularGirlNames')}
             </h3>
             {popularNames.girls.length > 0 ? (
               <div className="space-y-2">
                 {popularNames.girls.map((nameData, index) => (
                   <div key={index} className="flex justify-between items-center bg-pink-50 rounded-lg px-4 py-2">
                     <span className="font-medium">{nameData.name}</span>
-                    <span className="text-sm text-gray-600">{nameData.count} vote{nameData.count > 1 ? 's' : ''}</span>
+                    <span className="text-sm text-gray-600">{nameData.count} {nameData.count > 1 ? t('votes') : t('vote')}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">Aucun prénom de fille suggéré</p>
+              <p className="text-gray-500 italic">{t('noGirlNameSuggested')}</p>
             )}
           </div>
         </div>
@@ -612,13 +614,13 @@ const ResultsView = () => {
         {popularDate && (
           <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
             <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
-              <span className="mr-2">📅</span> Date la plus populaire
+              <span className="mr-2">📅</span> {t('mostPopularDate')}
             </h3>
             <div className="text-3xl font-bold text-purple-600 mb-2">
               {formatDate(popularDate.date)}
             </div>
             <p className="text-gray-600">
-              {popularDate.count} personne{popularDate.count > 1 ? 's ont choisi' : ' a choisi'} cette date
+              {popularDate.count} {popularDate.count > 1 ? t('people') : t('person')} {popularDate.count > 1 ? t('choseThisDatePlural') : t('choseThisDate')}
             </p>
           </div>
         )}
@@ -635,22 +637,22 @@ const ResultsView = () => {
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-gray-600">Date de naissance :</span>
+                  <span className="text-gray-600">{t('birthDate')} :</span>
                   <div className="font-medium">{formatDate(guess.birthDate)}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Heure :</span>
+                  <span className="text-gray-600">{t('birthTime')} :</span>
                   <div className="font-medium">{formatTime(guess.birthTime)}</div>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-gray-600">Poids :</span>
+                  <span className="text-gray-600">{t('weight')} :</span>
                   <div className="font-medium">{guess.weightKg} kg</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Taille :</span>
+                  <span className="text-gray-600">{t('height')} :</span>
                   <div className="font-medium">{guess.heightCm} cm</div>
                 </div>
               </div>
@@ -658,7 +660,7 @@ const ResultsView = () => {
               {/* Boy Names */}
               {(guess.firstNameBoy || guess.middleName1Boy || guess.middleName2Boy || guess.middleName3Boy || guess.middleName4Boy) && (
                 <div>
-                  <span className="text-gray-600">👦 Prénoms garçon :</span>
+                  <span className="text-gray-600">👦 {t('boyNames')} :</span>
                   <div className="font-medium text-blue-700">
                     {[guess.firstNameBoy, guess.middleName1Boy, guess.middleName2Boy, guess.middleName3Boy, guess.middleName4Boy]
                       .filter(name => name && name.trim())
@@ -671,7 +673,7 @@ const ResultsView = () => {
               {/* Girl Names */}
               {(guess.firstNameGirl || guess.middleName1Girl || guess.middleName2Girl || guess.middleName3Girl || guess.middleName4Girl) && (
                 <div>
-                  <span className="text-gray-600">👧 Prénoms fille :</span>
+                  <span className="text-gray-600">👧 {t('girlNames')} :</span>
                   <div className="font-medium text-pink-700">
                     {[guess.firstNameGirl, guess.middleName1Girl, guess.middleName2Girl, guess.middleName3Girl, guess.middleName4Girl]
                       .filter(name => name && name.trim())
@@ -685,13 +687,13 @@ const ResultsView = () => {
                 <div className="grid grid-cols-2 gap-4">
                   {guess.eyeColor && (
                     <div>
-                      <span className="text-gray-600">Yeux :</span>
+                      <span className="text-gray-600">{t('eyes')} :</span>
                       <div className="font-medium">{translateColor(guess.eyeColor)}</div>
                     </div>
                   )}
                   {guess.hairColor && (
                     <div>
-                      <span className="text-gray-600">Cheveux :</span>
+                      <span className="text-gray-600">{t('hair')} :</span>
                       <div className="font-medium">{translateColor(guess.hairColor)}</div>
                     </div>
                   )}
@@ -700,13 +702,13 @@ const ResultsView = () => {
               
               {guess.specialMessage && (
                 <div className="bg-gray-50 rounded-lg p-3 mt-4">
-                  <span className="text-gray-600">Message :</span>
+                  <span className="text-gray-600">{t('message')} :</span>
                   <div className="font-medium italic">"{guess.specialMessage}"</div>
                 </div>
               )}
               
               <div className="text-xs text-gray-400 text-right mt-4">
-                Soumis le {new Date(guess.submittedAt).toLocaleDateString('fr-FR')}
+                {t('submittedOn')} {new Date(guess.submittedAt).toLocaleDateString('fr-FR')}
               </div>
             </div>
           </div>
