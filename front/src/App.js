@@ -25,28 +25,33 @@ export default function App() {
         </header>
 
         {/* Navigation */}
-        <nav className="flex justify-center mb-8">
-          <div className="bg-white rounded-full p-2 shadow-lg">
-            <button
-              onClick={() => setCurrentView('form')}
-              className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-                currentView === 'form'
-                  ? 'bg-purple-500 text-white shadow-md'
-                  : 'text-gray-600 hover:text-purple-500'
-              }`}
-            >
-              Faire mon pronostic
-            </button>
-            <button
-              onClick={() => setCurrentView('results')}
-              className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-                currentView === 'results'
-                  ? 'bg-purple-500 text-white shadow-md'
-                  : 'text-gray-600 hover:text-purple-500'
-              }`}
-            >
-              Voir tous les pronostics
-            </button>
+        <nav className="mb-8 px-4 sm:px-0 sm:flex sm:justify-center">
+          <div className="w-full sm:w-auto bg-white rounded-2xl sm:rounded-full p-2 shadow-lg sm:inline-flex">
+            {/* Mobile: Stack vertically with full width, Desktop: Side by side */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+              <button
+                onClick={() => setCurrentView('form')}
+                className={`w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-3 rounded-xl sm:rounded-full font-medium text-sm sm:text-base transition-all duration-200 whitespace-nowrap ${
+                  currentView === 'form'
+                    ? 'bg-purple-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-purple-500 hover:bg-gray-50 sm:hover:bg-transparent'
+                }`}
+              >
+                <span className="sm:hidden">Faire mon pronostic</span>
+                <span className="hidden sm:inline">Faire mon pronostic</span>
+              </button>
+              <button
+                onClick={() => setCurrentView('results')}
+                className={`w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-3 rounded-xl sm:rounded-full font-medium text-sm sm:text-base transition-all duration-200 whitespace-nowrap ${
+                  currentView === 'results'
+                    ? 'bg-purple-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-purple-500 hover:bg-gray-50 sm:hover:bg-transparent'
+                }`}
+              >
+                <span className="sm:hidden">Voir les pronostics</span>
+                <span className="hidden sm:inline">Voir tous les pronostics</span>
+              </button>
+            </div>
           </div>
         </nav>
 
